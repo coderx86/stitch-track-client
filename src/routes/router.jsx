@@ -3,6 +3,7 @@ import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import Register from '../pages/Auth/Register';
 import Login from '../pages/Auth/Login';
+import PrivateRoute from './PrivateRoute';
 
 const router = createBrowserRouter([
     {
