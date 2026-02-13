@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import useAxios from '../../hooks/useAxios';
 import { FiSearch } from 'react-icons/fi';
+import ProductCard from '../../components/Shared/ProductCard';
 
 const AllProducts = () => {
     const axios = useAxios();
@@ -73,32 +74,7 @@ const AllProducts = () => {
                 <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {products.map((product, i) => (
-                            <motion.div
-                                key={product._id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.05 }}
-                                className="card bg-base-100 border border-base-300 shadow-sm hover:shadow-xl transition-all group"
-                            >
-                                <figure className="relative overflow-hidden">
-                                    <img
-                                        src={product.images?.[0] || 'https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp'}
-                                        alt={product.title}
-                                        className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                    <div className="absolute top-3 right-3 badge badge-primary font-semibold">${product.price}</div>
-                                </figure>
-                                <div className="card-body">
-                                    <h3 className="card-title text-lg">{product.title}</h3>
-                                    <div className="flex items-center justify-between">
-                                        <span className="badge badge-outline badge-sm">{product.category}</span>
-                                        <span className="text-sm text-base-content/50">Qty: {product.quantity}</span>
-                                    </div>
-                                    <div className="card-actions mt-3">
-                                        <Link to={`/product/${product._id}`} className="btn btn-primary btn-sm w-full">View Details</Link>
-                                    </div>
-                                </div>
-                            </motion.div>
+                            <ProductCard key={product._id} product={product} index={i} />
                         ))}
                     </div>
 
