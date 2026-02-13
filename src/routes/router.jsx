@@ -27,6 +27,13 @@ const router = createBrowserRouter([
             { path: 'login', element: <Login /> },
             { path: 'register', element: <Register /> },
         ]
+    },
+    {
+        path: '/dashboard',
+        element: <PrivateRoute><DashboardLayout /></PrivateRoute>,
+        children: [
+            { index: true, element: <div className="p-10 text-center text-3xl font-bold italic text-base-content/20">Dashboard Home Stub</div> },
+        ]
     }
 ]);
 
