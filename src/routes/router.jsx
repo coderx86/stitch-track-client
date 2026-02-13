@@ -3,6 +3,7 @@ import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import Register from '../pages/Auth/Register';
 import Login from '../pages/Auth/Login';
+import Home from '../pages/Home/Home';
 import PrivateRoute from './PrivateRoute';
 
 const router = createBrowserRouter([
@@ -10,7 +11,7 @@ const router = createBrowserRouter([
         path: '/',
         element: <MainLayout />,
         children: [
-            { index: true, element: <div className="p-10 text-center text-3xl font-bold">Welcome to StitchTrack</div> },
+            { index: true, element: <Home /> },
         ]
     },
     {
