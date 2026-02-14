@@ -13,6 +13,9 @@ import ManageUsers from '../pages/Dashboard/Admin/ManageUsers';
 import AddProduct from '../pages/Dashboard/Manager/AddProduct';
 import ManageProducts from '../pages/Dashboard/Manager/ManageProducts';
 import EditProduct from '../pages/Dashboard/Manager/EditProduct';
+import PaymentPage from '../pages/Payment/PaymentPage';
+import PaymentSuccess from '../pages/Payment/PaymentSuccess';
+import PaymentFail from '../pages/Payment/PaymentFail';
 import PrivateRoute from './PrivateRoute';
 import AdminRoute from './AdminRoute';
 import ManagerRoute from './ManagerRoute';
@@ -46,6 +49,9 @@ const router = createBrowserRouter([
             { path: 'add-product', element: <ManagerRoute><AddProduct /></ManagerRoute> },
             { path: 'manage-products', element: <ManagerRoute><ManageProducts /></ManagerRoute> },
             { path: 'edit-product/:id', element: <ManagerRoute><EditProduct /></ManagerRoute> },
+            { path: 'pay/:id', element: <PaymentPage /> },
+            { path: 'payment-success', element: <PaymentSuccess /> },
+            { path: 'payment-fail', element: <PaymentFail /> },
         ]
     }
 ]);
