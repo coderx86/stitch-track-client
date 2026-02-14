@@ -10,6 +10,8 @@ import ProductDetails from '../pages/Products/ProductDetails';
 import BookingForm from '../pages/Products/BookingForm';
 import MyOrders from '../pages/Dashboard/Buyer/MyOrders';
 import PrivateRoute from './PrivateRoute';
+import AdminRoute from './AdminRoute';
+import ManagerRoute from './ManagerRoute';
 
 const router = createBrowserRouter([
     {
