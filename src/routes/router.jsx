@@ -8,6 +8,7 @@ import Home from '../pages/Home/Home';
 import AllProducts from '../pages/Products/AllProducts';
 import ProductDetails from '../pages/Products/ProductDetails';
 import BookingForm from '../pages/Products/BookingForm';
+import MyOrders from '../pages/Dashboard/Buyer/MyOrders';
 import PrivateRoute from './PrivateRoute';
 
 const router = createBrowserRouter([
@@ -34,6 +35,7 @@ const router = createBrowserRouter([
         element: <PrivateRoute><DashboardLayout /></PrivateRoute>,
         children: [
             { index: true, element: <div className="p-10 text-center text-3xl font-bold italic text-base-content/20">Dashboard Home Stub</div> },
+            { path: 'my-orders', element: <MyOrders /> },
         ]
     }
 ]);
