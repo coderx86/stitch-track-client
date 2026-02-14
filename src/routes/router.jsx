@@ -9,6 +9,7 @@ import AllProducts from '../pages/Products/AllProducts';
 import ProductDetails from '../pages/Products/ProductDetails';
 import BookingForm from '../pages/Products/BookingForm';
 import MyOrders from '../pages/Dashboard/Buyer/MyOrders';
+import ManageUsers from '../pages/Dashboard/Admin/ManageUsers';
 import PrivateRoute from './PrivateRoute';
 import AdminRoute from './AdminRoute';
 import ManagerRoute from './ManagerRoute';
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
         children: [
             { index: true, element: <div className="p-10 text-center text-3xl font-bold italic text-base-content/20">Dashboard Home Stub</div> },
             { path: 'my-orders', element: <MyOrders /> },
+            { path: 'manage-users', element: <AdminRoute><ManageUsers /></AdminRoute> },
         ]
     }
 ]);
