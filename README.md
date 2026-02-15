@@ -1,16 +1,50 @@
-# React + Vite
+# StitchTrack - Garment Order & Production Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+StitchTrack is a modern, full-stack platform designed to streamline the production workflow in the garment industry. It connects manufacturers (Managers), buyers (Users), and platform administrators (Admins) through a transparent and efficient real-time tracking system.
 
-Currently, two official plugins are available:
+## 🚀 Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+-   **Role-Based Dashboards**: Tailored experiences for Admins, Managers, and Buyers.
+-   **Production Tracking**: Real-time status updates (Cutting, Sewing, Finishing, etc.) for garment orders.
+-   **Secure Payments**: Integrated Stripe payment gateway for safe and fast transactions.
+-   **Product Management**: Comprehensive tools for listing, editing, and managing garment products.
+-   **Analytics**: Data-driven insights for Admins leveraging Recharts.
+-   **Interactive UI**: Smooth animations using Framer Motion and a responsive, modern design system.
+-   **Authentication**: Secure Firebase authentication with Google social login support.
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+-   **Frontend**: React, Vite, Tailwind CSS, DaisyUI, Framer Motion, React Query, React Router, Recharts.
+-   **Backend**: Node.js, Express.js.
+-   **Database**: MongoDB.
+-   **Authentication**: Firebase.
+-   **Payments**: Stripe API.
+-   **Image Hosting**: ImgBB.
 
-## Expanding the ESLint configuration
+## 📦 Installation
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1.  **Clone the repository**:
+    ```bash
+    git clone [repository-url]
+    ```
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
+3.  **Environment Variables**:
+    Create a `.env` file in the root directory and add:
+    ```env
+    VITE_FIREBASE_API_KEY=...
+    VITE_FIREBASE_AUTH_DOMAIN=...
+    VITE_FIREBASE_PROJECT_ID=...
+    VITE_FIREBASE_STORAGE_BUCKET=...
+    VITE_FIREBASE_MESSAGING_SENDER_ID=...
+    VITE_FIREBASE_APP_ID=...
+    VITE_IMGBB_API_KEY=...
+    VITE_STRIPE_PUBLISHABLE_KEY=...
+    VITE_API_URL=http://localhost:3000
+    ```
+4.  **Run the development server**:
+    ```bash
+    npm run dev
+    ```
