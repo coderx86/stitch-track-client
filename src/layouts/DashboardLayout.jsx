@@ -35,6 +35,7 @@ const DashboardLayout = () => {
     const buyerLinks = [
         { to: '/dashboard', label: 'Dashboard', icon: <FiHome />, end: true },
         { to: '/dashboard/my-orders', label: 'My Orders', icon: <FiShoppingCart /> },
+        { to: '/dashboard/payment-history', label: 'Payment History', icon: <FiCheckCircle /> },
         { to: '/dashboard/profile', label: 'My Profile', icon: <FiUser /> },
     ];
 

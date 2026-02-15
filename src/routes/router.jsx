@@ -9,6 +9,7 @@ import AllProducts from '../pages/Products/AllProducts';
 import ProductDetails from '../pages/Products/ProductDetails';
 import BookingForm from '../pages/Products/BookingForm';
 import MyOrders from '../pages/Dashboard/Buyer/MyOrders';
+import PaymentHistory from '../pages/Dashboard/Buyer/PaymentHistory';
 import ManageUsers from '../pages/Dashboard/Admin/ManageUsers';
 import AddProduct from '../pages/Dashboard/Manager/AddProduct';
 import ManageProducts from '../pages/Dashboard/Manager/ManageProducts';
@@ -49,6 +50,7 @@ const router = createBrowserRouter([
         children: [
             { index: true, element: <div className="p-10 text-center text-3xl font-bold italic text-base-content/20">Dashboard Home Stub</div> },
             { path: 'my-orders', element: <MyOrders /> },
+            { path: 'payment-history', element: <PaymentHistory /> },
             { path: 'manage-users', element: <AdminRoute><ManageUsers /></AdminRoute> },
             { path: 'add-product', element: <ManagerRoute><AddProduct /></ManagerRoute> },
             { path: 'manage-products', element: <ManagerRoute><ManageProducts /></ManagerRoute> },
