@@ -9,6 +9,7 @@ import AllProducts from '../pages/Products/AllProducts';
 import ProductDetails from '../pages/Products/ProductDetails';
 import BookingForm from '../pages/Products/BookingForm';
 import MyOrders from '../pages/Dashboard/Buyer/MyOrders';
+import Profile from '../pages/Dashboard/Profile';
 import DashboardHome from '../pages/Dashboard/DashboardHome';
 import PaymentHistory from '../pages/Dashboard/Buyer/PaymentHistory';
 import ManageUsers from '../pages/Dashboard/Admin/ManageUsers';
@@ -53,6 +54,7 @@ const router = createBrowserRouter([
         element: <PrivateRoute><DashboardLayout /></PrivateRoute>,
         children: [
             { index: true, element: <DashboardHome /> },
+            { path: 'profile', element: <Profile /> },
             { path: 'my-orders', element: <MyOrders /> },
             { path: 'payment-history', element: <PaymentHistory /> },
             { path: 'manage-users', element: <AdminRoute><ManageUsers /></AdminRoute> },
