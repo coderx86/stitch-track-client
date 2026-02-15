@@ -5,6 +5,8 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import Register from '../pages/Auth/Register';
 import Login from '../pages/Auth/Login';
 import Home from '../pages/Home/Home';
+import About from '../pages/About/About';
+import Contact from '../pages/Contact/Contact';
 import AllProducts from '../pages/Products/AllProducts';
 import ProductDetails from '../pages/Products/ProductDetails';
 import BookingForm from '../pages/Products/BookingForm';
@@ -37,6 +39,8 @@ const router = createBrowserRouter([
         children: [
             { index: true, element: <Home /> },
             { path: 'all-products', element: <AllProducts /> },
+            { path: 'about', element: <About /> },
+            { path: 'contact', element: <Contact /> },
             { path: 'product/:id', element: <ProductDetails /> },
             { path: 'book-product/:id', element: <PrivateRoute><BookingForm /></PrivateRoute> },
         ]
