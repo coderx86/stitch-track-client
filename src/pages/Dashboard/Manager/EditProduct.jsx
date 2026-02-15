@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import { FiType, FiFileText, FiDollarSign, FiHash, FiVideo, FiGrid, FiUploadCloud, FiX } from 'react-icons/fi';
+import { FiType, FiFileText, FiDollarSign, FiHash, FiVideo, FiGrid, FiUploadCloud, FiLink, FiX, FiPlus } from 'react-icons/fi';
 
 const imgbbApiKey = import.meta.env.VITE_IMGBB_API_KEY;
 
@@ -16,9 +16,12 @@ const EditProduct = () => {
 
     const [imageFiles, setImageFiles] = useState([]);
     const [imageUrls, setImageUrls] = useState([]);
+    const [urlInput, setUrlInput] = useState('');
     const [uploading, setUploading] = useState(false);
+    const [uploadMode, setUploadMode] = useState('file');
     const [loading, setLoading] = useState(true);
 
+    // Fetch existing product data
     useEffect(() => {
         const fetchProduct = async () => {
             try {
@@ -33,7 +36,10 @@ const EditProduct = () => {
                     paymentOption: data.paymentOption,
                     demoVideo: data.demoVideo || ''
                 });
-                if (data.images && data.images.length > 0) setImageUrls(data.images);
+                // Pre-fill existing images as already-uploaded URLs
+                if (data.images && data.images.length > 0) {
+                    setImageUrls(data.images);
+                }
             } catch (error) {
                 Swal.fire({ icon: 'error', title: 'Failed to load product', text: error.message });
                 navigate('/dashboard/manage-products');
@@ -44,9 +50,9 @@ const EditProduct = () => {
         fetchProduct();
     }, [id]);
 
-    const uploadToImgBB = async (file) => {
+    const uploadToImgBB = async (fileOrUrl) => {
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('image', fileOrUrl);
         const { data } = await axios.post(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, formData);
         if (data.success) return data.data.display_url;
         throw new Error('Image upload failed');
@@ -60,6 +66,21 @@ const EditProduct = () => {
         }));
         setImageFiles(prev => [...prev, ...newFiles]);
         e.target.value = '';
+    };
+
+    const handleAddUrl = async () => {
+        const urls = urlInput.split(',').map(u => u.trim()).filter(Boolean);
+        if (urls.length === 0) return;
+        setUploading(true);
+        try {
+            const uploaded = await Promise.all(urls.map(url => uploadToImgBB(url)));
+            setImageUrls(prev => [...prev, ...uploaded]);
+            setUrlInput('');
+        } catch (err) {
+            Swal.fire({ icon: 'error', title: 'Upload Failed', text: err.message });
+        } finally {
+            setUploading(false);
+        }
     };
 
     const removeFile = (index) => {
@@ -83,7 +104,9 @@ const EditProduct = () => {
 
         try {
             setUploading(true);
-            const uploadedFileUrls = await Promise.all(imageFiles.map(item => uploadToImgBB(item.file)));
+
+            const fileUploadPromises = imageFiles.map(item => uploadToImgBB(item.file));
+            const uploadedFileUrls = await Promise.all(fileUploadPromises);
             const allImages = [...uploadedFileUrls, ...imageUrls];
 
             const productData = {
@@ -108,66 +131,193 @@ const EditProduct = () => {
         }
     };
 
-    if (loading) return <div className="flex justify-center py-20"><span className="loading loading-spinner loading-lg text-primary"></span></div>;
+    const allPreviews = [
+        ...imageFiles.map((item, i) => ({ type: 'file', src: item.preview, index: i })),
+        ...imageUrls.map((url, i) => ({ type: 'url', src: url, index: i }))
+    ];
+
+    if (loading) {
+        return (
+            <div className="flex justify-center py-20">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        );
+    }
 
     return (
         <div>
             <h1 className="text-2xl font-extrabold mb-6">Edit Product</h1>
-            <div className="card bg-base-100 border border-base-300 shadow-sm max-w-3xl rounded-2xl p-8">
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                    <div>
-                        <label className="text-xs font-semibold uppercase tracking-wider mb-2 block">Product Title</label>
-                        <div className="flex items-center gap-3 border border-base-300 rounded-xl px-4 py-3">
-                            <FiType /><input type="text" className="bg-transparent outline-none w-full" {...register('title', { required: true })} />
+
+            <div className="card bg-base-100 border border-base-300 shadow-sm max-w-3xl rounded-2xl">
+                <div className="card-body p-6 md:p-8">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+
+                        {/* Title */}
+                        <div>
+                            <label className="text-xs font-semibold uppercase tracking-wider text-base-content/60 mb-2 block">Product Title</label>
+                            <div className="flex items-center gap-3 border border-base-300 rounded-xl px-4 py-3 focus-within:border-primary transition-colors">
+                                <FiType className="text-base-content/30 text-lg shrink-0" />
+                                <input type="text" placeholder="e.g. Premium Cotton Shirt" className="bg-transparent outline-none w-full text-sm placeholder:text-base-content/30" {...register('title', { required: 'Required' })} />
+                            </div>
+                            {errors.title && <span className="text-error text-xs mt-1 block">{errors.title.message}</span>}
                         </div>
-                    </div>
-                    <div>
-                        <label className="text-xs font-semibold uppercase tracking-wider mb-2 block">Description</label>
-                        <div className="flex items-start gap-3 border border-base-300 rounded-xl px-4 py-3">
-                            <FiFileText className="mt-1" /><textarea className="bg-transparent outline-none w-full" rows={3} {...register('description', { required: true })} />
+
+                        <div className="border-b border-base-200"></div>
+
+                        {/* Description */}
+                        <div>
+                            <label className="text-xs font-semibold uppercase tracking-wider text-base-content/60 mb-2 block">Description</label>
+                            <div className="flex items-start gap-3 border border-base-300 rounded-xl px-4 py-3 focus-within:border-primary transition-colors">
+                                <FiFileText className="text-base-content/30 text-lg shrink-0 mt-0.5" />
+                                <textarea placeholder="Detailed product description..." className="bg-transparent outline-none w-full text-sm resize-none placeholder:text-base-content/30" rows={3} {...register('description', { required: 'Required' })} />
+                            </div>
+                            {errors.description && <span className="text-error text-xs mt-1 block">{errors.description.message}</span>}
                         </div>
-                    </div>
-                    <div className="grid md:grid-cols-2 gap-5">
-                        <select className="select select-bordered" {...register('category', { required: true })}>
-                            <option value="">Select Category</option>
-                            <option value="Shirt">Shirt</option><option value="Pant">Pant</option><option value="Jacket">Jacket</option><option value="Accessories">Accessories</option>
-                        </select>
-                        <div className="flex items-center gap-4">
-                            <label className="flex items-center gap-2"><input type="radio" value="cod" className="radio radio-primary" {...register('paymentOption')} /><span>COD</span></label>
-                            <label className="flex items-center gap-2"><input type="radio" value="payfirst" className="radio radio-primary" {...register('paymentOption')} /><span>PayFirst</span></label>
-                        </div>
-                    </div>
-                    <div className="grid md:grid-cols-3 gap-5">
-                        <input type="number" step="0.01" className="input input-bordered" {...register('price', { required: true })} />
-                        <input type="number" className="input input-bordered" {...register('quantity', { required: true })} />
-                        <input type="number" className="input input-bordered" {...register('moq')} />
-                    </div>
-                    <div>
-                        <label className="text-xs font-semibold uppercase tracking-wider mb-2 block">Product Images</label>
-                        <label className="flex flex-col items-center gap-2 border-2 border-dashed border-base-300 rounded-xl p-6 cursor-pointer hover:border-primary/50 transition-colors">
-                            <FiUploadCloud className="text-3xl text-base-content/20" />
-                            <span className="text-sm text-base-content/50">Click to select new images</span>
-                            <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileSelect} />
-                        </label>
-                        <div className="flex flex-wrap gap-3 mt-4">
-                            {imageUrls.map((url, i) => (
-                                <div key={`url-${i}`} className="relative group">
-                                    <img src={url} className="w-20 h-20 object-cover rounded-xl border border-base-300" alt="" />
-                                    <button type="button" onClick={() => removeUrl(i)} className="absolute -top-2 -right-2 btn btn-circle btn-xs btn-error shadow-md"><FiX /></button>
+
+                        <div className="border-b border-base-200"></div>
+
+                        {/* Category & Payment */}
+                        <div className="grid md:grid-cols-2 gap-5">
+                            <div>
+                                <label className="text-xs font-semibold uppercase tracking-wider text-base-content/60 mb-2 block">Category</label>
+                                <div className="flex items-center gap-3 border border-base-300 rounded-xl px-4 py-3 focus-within:border-primary transition-colors">
+                                    <FiGrid className="text-base-content/30 text-lg shrink-0" />
+                                    <select className="bg-transparent outline-none w-full text-sm cursor-pointer" {...register('category', { required: 'Required' })}>
+                                        <option value="">Select Category</option>
+                                        <option value="Shirt">Shirt</option>
+                                        <option value="Pant">Pant</option>
+                                        <option value="Jacket">Jacket</option>
+                                        <option value="Accessories">Accessories</option>
+                                    </select>
                                 </div>
-                            ))}
-                            {imageFiles.map((item, i) => (
-                                <div key={`file-${i}`} className="relative group">
-                                    <img src={item.preview} className="w-20 h-20 object-cover rounded-xl border border-base-300" alt="" />
-                                    <button type="button" onClick={() => removeFile(i)} className="absolute -top-2 -right-2 btn btn-circle btn-xs btn-error shadow-md"><FiX /></button>
+                                {errors.category && <span className="text-error text-xs mt-1 block">{errors.category.message}</span>}
+                            </div>
+                            <div>
+                                <label className="text-xs font-semibold uppercase tracking-wider text-base-content/60 mb-2 block">Payment Option</label>
+                                <div className="flex items-center gap-6 px-1 py-3">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" value="cod" className="radio radio-primary radio-sm" {...register('paymentOption', { required: 'Required' })} />
+                                        <span className="text-sm font-medium">COD</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" value="payfirst" className="radio radio-primary radio-sm" {...register('paymentOption', { required: 'Required' })} />
+                                        <span className="text-sm font-medium">PayFirst</span>
+                                    </label>
                                 </div>
-                            ))}
+                            </div>
                         </div>
-                    </div>
-                    <button type="submit" disabled={uploading} className="btn btn-primary w-full">
-                        {uploading ? 'Updating...' : 'Update Product'}
-                    </button>
-                </form>
+
+                        <div className="border-b border-base-200"></div>
+
+                        {/* Price / Qty / MOQ */}
+                        <div className="grid md:grid-cols-3 gap-5">
+                            <div>
+                                <label className="text-xs font-semibold uppercase tracking-wider text-base-content/60 mb-2 block">Price ($)</label>
+                                <div className="flex items-center gap-3 border border-base-300 rounded-xl px-4 py-3 focus-within:border-primary transition-colors">
+                                    <FiDollarSign className="text-base-content/30 text-lg shrink-0" />
+                                    <input type="number" step="0.01" placeholder="29.99" className="bg-transparent outline-none w-full text-sm placeholder:text-base-content/30" {...register('price', { required: 'Required', min: { value: 0.01, message: 'Must be > 0' } })} />
+                                </div>
+                                {errors.price && <span className="text-error text-xs mt-1 block">{errors.price.message}</span>}
+                            </div>
+                            <div>
+                                <label className="text-xs font-semibold uppercase tracking-wider text-base-content/60 mb-2 block">Quantity</label>
+                                <div className="flex items-center gap-3 border border-base-300 rounded-xl px-4 py-3 focus-within:border-primary transition-colors">
+                                    <FiHash className="text-base-content/30 text-lg shrink-0" />
+                                    <input type="number" placeholder="100" className="bg-transparent outline-none w-full text-sm placeholder:text-base-content/30" {...register('quantity', { required: 'Required', min: { value: 1, message: 'Min 1' } })} />
+                                </div>
+                                {errors.quantity && <span className="text-error text-xs mt-1 block">{errors.quantity.message}</span>}
+                            </div>
+                            <div>
+                                <label className="text-xs font-semibold uppercase tracking-wider text-base-content/60 mb-2 block">MOQ</label>
+                                <div className="flex items-center gap-3 border border-base-300 rounded-xl px-4 py-3 focus-within:border-primary transition-colors">
+                                    <FiHash className="text-base-content/30 text-lg shrink-0" />
+                                    <input type="number" placeholder="10" className="bg-transparent outline-none w-full text-sm placeholder:text-base-content/30" {...register('moq')} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="border-b border-base-200"></div>
+
+                        {/* ─── Product Images (imgbb) ─── */}
+                        <div>
+                            <label className="text-xs font-semibold uppercase tracking-wider text-base-content/60 mb-2 block">Product Images</label>
+
+                            {/* Mode tabs */}
+                            <div className="flex gap-2 mb-3">
+                                <button type="button" onClick={() => setUploadMode('file')}
+                                    className={`btn btn-sm rounded-lg gap-1.5 ${uploadMode === 'file' ? 'btn-primary' : 'btn-ghost border border-base-300'}`}>
+                                    <FiUploadCloud className="text-sm" /> Upload Files
+                                </button>
+                                <button type="button" onClick={() => setUploadMode('url')}
+                                    className={`btn btn-sm rounded-lg gap-1.5 ${uploadMode === 'url' ? 'btn-primary' : 'btn-ghost border border-base-300'}`}>
+                                    <FiLink className="text-sm" /> Image URL
+                                </button>
+                            </div>
+
+                            {uploadMode === 'file' && (
+                                <label htmlFor="product-images" className="flex flex-col items-center gap-2 border-2 border-dashed border-base-300 rounded-xl p-6 cursor-pointer hover:border-primary/50 transition-colors group">
+                                    <FiUploadCloud className="text-3xl text-base-content/20 group-hover:text-primary transition-colors" />
+                                    <span className="text-sm text-base-content/50 group-hover:text-base-content/70">Click to select images</span>
+                                    <span className="text-xs text-base-content/30">JPG, PNG, GIF • Max 32 MB each</span>
+                                    <input id="product-images" type="file" accept="image/*" multiple className="hidden" onChange={handleFileSelect} />
+                                </label>
+                            )}
+
+                            {uploadMode === 'url' && (
+                                <div className="flex gap-2">
+                                    <div className="flex items-center gap-3 border border-base-300 rounded-xl px-4 py-3 focus-within:border-primary transition-colors flex-1">
+                                        <FiLink className="text-base-content/30 text-lg shrink-0" />
+                                        <input type="text" value={urlInput} onChange={(e) => setUrlInput(e.target.value)}
+                                            placeholder="https://example.com/img.jpg  (comma-separate for multiple)"
+                                            className="bg-transparent outline-none w-full text-sm placeholder:text-base-content/30"
+                                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddUrl(); } }}
+                                        />
+                                    </div>
+                                    <button type="button" onClick={handleAddUrl} disabled={uploading || !urlInput.trim()}
+                                        className="btn btn-primary btn-square rounded-xl shrink-0">
+                                        {uploading ? <span className="loading loading-spinner loading-xs"></span> : <FiPlus className="text-lg" />}
+                                    </button>
+                                </div>
+                            )}
+
+                            {allPreviews.length > 0 && (
+                                <div className="flex flex-wrap gap-3 mt-4">
+                                    {allPreviews.map((item, i) => (
+                                        <div key={`${item.type}-${item.index}`} className="relative group">
+                                            <img src={item.src} alt={`preview-${i}`}
+                                                className="w-20 h-20 object-cover rounded-xl border border-base-300 ring-2 ring-transparent group-hover:ring-primary/30 transition-all" />
+                                            <button type="button"
+                                                onClick={() => item.type === 'file' ? removeFile(item.index) : removeUrl(item.index)}
+                                                className="absolute -top-2 -right-2 btn btn-circle btn-xs btn-error shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <FiX className="text-xs" />
+                                            </button>
+                                            {item.type === 'url' && (
+                                                <span className="absolute bottom-1 left-1 bg-success text-success-content text-[9px] font-bold px-1.5 py-0.5 rounded-md">✓</span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <p className="text-xs text-base-content/40 mt-2">
+                                {allPreviews.length === 0 ? 'No images added yet' : `${allPreviews.length} image(s) — new files will be uploaded to imgbb on submit`}
+                            </p>
+                        </div>
+
+                        {/* Demo Video */}
+                        <div>
+                            <label className="text-xs font-semibold uppercase tracking-wider text-base-content/60 mb-2 block">Demo Video URL</label>
+                            <div className="flex items-center gap-3 border border-base-300 rounded-xl px-4 py-3 focus-within:border-primary transition-colors">
+                                <FiVideo className="text-base-content/30 text-lg shrink-0" />
+                                <input type="url" placeholder="https://youtube.com/embed/..." className="bg-transparent outline-none w-full text-sm placeholder:text-base-content/30" {...register('demoVideo')} />
+                            </div>
+                        </div>
+
+                        <button type="submit" disabled={uploading} className="btn btn-primary w-full rounded-xl text-base h-12 mt-2">
+                            {uploading ? <><span className="loading loading-spinner loading-sm"></span> Updating…</> : 'Update Product'}
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     );

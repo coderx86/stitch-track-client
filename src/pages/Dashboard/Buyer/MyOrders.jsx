@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import Swal from 'sweetalert2';
-import { FiXCircle } from 'react-icons/fi';
+import { FiXCircle, FiEye, FiTruck } from 'react-icons/fi';
 import { Link } from 'react-router';
 
 const MyOrders = () => {
@@ -44,12 +44,13 @@ const MyOrders = () => {
 
     return (
         <div>
-            <h1 className="text-2xl font-extrabold mb-6">My Orders (Cart)</h1>
+            <h1 className="text-2xl font-extrabold mb-6">My Orders</h1>
+
             {isLoading ? (
                 <div className="flex justify-center py-10"><span className="loading loading-spinner loading-lg text-primary"></span></div>
             ) : orders.length === 0 ? (
                 <div className="text-center py-20 text-base-content/50">
-                    <p className="text-lg">No items in your cart/orders yet</p>
+                    <p className="text-lg">No orders yet</p>
                     <Link to="/all-products" className="btn btn-primary btn-sm mt-4">Browse Products</Link>
                 </div>
             ) : (
@@ -58,10 +59,13 @@ const MyOrders = () => {
                         <thead className="text-base-content/60 text-sm">
                             <tr>
                                 <th>#</th>
+                                <th>Tracking ID</th>
                                 <th>Product</th>
                                 <th>Qty</th>
                                 <th>Total</th>
                                 <th>Status</th>
+                                <th>Payment</th>
+                                <th>Date</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -69,16 +73,36 @@ const MyOrders = () => {
                             {orders.map((o, i) => (
                                 <tr key={o._id}>
                                     <td>{i + 1}</td>
+                                    <td>
+                                        {(o.status === 'approved' || o.status === 'completed') ? (
+                                            <Link to={`/dashboard/track-order/${o._id}`} className="badge badge-ghost font-mono text-xs">
+                                                ST-{o._id.slice(-6).toUpperCase()}
+                                            </Link>
+                                        ) : (
+                                            <span className="text-xs text-base-content/40">—</span>
+                                        )}
+                                    </td>
                                     <td className="font-bold">{o.productTitle}</td>
                                     <td>{o.quantity}</td>
                                     <td className="font-bold text-primary">${o.totalPrice}</td>
                                     <td>{statusBadge(o.status)}</td>
                                     <td>
-                                        {o.status === 'pending' && (
-                                            <button className="btn btn-error btn-xs btn-outline" onClick={() => handleCancel(o._id)} title="Cancel/Delete">
-                                                <FiXCircle />
-                                            </button>
-                                        )}
+                                        <span className={`badge badge-sm ${o.paymentStatus === 'paid' ? 'badge-success' : 'badge-warning'}`}>
+                                            {o.paymentStatus === 'paid' ? 'Paid' : 'Unpaid'}
+                                        </span>
+                                    </td>
+                                    <td className="text-sm text-base-content/70">{new Date(o.orderedAt).toLocaleDateString()}</td>
+                                    <td>
+                                        <div className="flex gap-2">
+                                            {o.status !== 'completed' && o.paymentStatus !== 'paid' && o.paymentMethod === 'payfirst' && (
+                                                <Link to={`/dashboard/payment/${o._id}`} className="btn btn-primary btn-xs">Pay</Link>
+                                            )}
+                                            {o.status === 'pending' && (
+                                                <button className="btn btn-error btn-xs btn-outline" onClick={() => handleCancel(o._id)} title="Cancel Order">
+                                                    <FiXCircle />
+                                                </button>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

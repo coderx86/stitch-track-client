@@ -50,9 +50,9 @@ const ManageProducts = () => {
                 </div>
             ) : (
                 <div className="overflow-x-auto">
-                    <table className="table table-zebra w-full">
+                    <table className="table table-zebra">
                         <thead>
-                            <tr><th>#</th><th>Product</th><th>Category</th><th>Price</th><th>Qty</th><th>Actions</th></tr>
+                            <tr><th>#</th><th>Product</th><th>Category</th><th>Price</th><th>Qty</th><th>MOQ</th><th>Actions</th></tr>
                         </thead>
                         <tbody>
                             {products.map((p, i) => (
@@ -60,17 +60,14 @@ const ManageProducts = () => {
                                     <td>{i + 1}</td>
                                     <td>
                                         <div className="flex items-center gap-3">
-                                            <div className="avatar">
-                                                <div className="w-10 rounded">
-                                                    <img src={p.images?.[0] || 'https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp'} alt="" />
-                                                </div>
-                                            </div>
+                                            <div className="avatar"><div className="w-10 rounded"><img src={p.images?.[0] || 'https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp'} alt="" /></div></div>
                                             <span className="font-medium text-sm">{p.title}</span>
                                         </div>
                                     </td>
                                     <td><span className="badge badge-outline badge-sm">{p.category}</span></td>
                                     <td>${p.price}</td>
                                     <td>{p.quantity}</td>
+                                    <td>{p.moq}</td>
                                     <td>
                                         <div className="flex gap-1">
                                             <Link to={`/dashboard/edit-product/${p._id}`} className="btn btn-ghost btn-xs text-info"><FiEdit2 /></Link>

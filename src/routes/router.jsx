@@ -14,7 +14,6 @@ import BookingForm from '../pages/Products/BookingForm';
 import MyOrders from '../pages/Dashboard/Buyer/MyOrders';
 import Profile from '../pages/Dashboard/Profile';
 import DashboardHome from '../pages/Dashboard/DashboardHome';
-import PaymentHistory from '../pages/Dashboard/Buyer/PaymentHistory';
 import ManageUsers from '../pages/Dashboard/Admin/ManageUsers';
 import AdminAllProducts from '../pages/Dashboard/Admin/AdminAllProducts';
 import AdminAllOrders from '../pages/Dashboard/Admin/AdminAllOrders';
@@ -36,7 +35,7 @@ import ManagerRoute from './ManagerRoute';
 const router = createBrowserRouter([
     {
         path: '/',
-        element: <MainLayout />,
+        element: <RootLayout />,
         errorElement: <ErrorPage />,
         children: [
             { index: true, element: <Home /> },
@@ -62,7 +61,6 @@ const router = createBrowserRouter([
             { index: true, element: <DashboardHome /> },
             { path: 'profile', element: <Profile /> },
             { path: 'my-orders', element: <MyOrders /> },
-            { path: 'payment-history', element: <PaymentHistory /> },
             { path: 'manage-users', element: <AdminRoute><ManageUsers /></AdminRoute> },
             { path: 'all-products', element: <AdminRoute><AdminAllProducts /></AdminRoute> },
             { path: 'all-orders', element: <AdminRoute><AdminAllOrders /></AdminRoute> },
@@ -73,12 +71,13 @@ const router = createBrowserRouter([
             { path: 'pending-orders', element: <ManagerRoute><PendingOrders /></ManagerRoute> },
             { path: 'approved-orders', element: <ManagerRoute><ApprovedOrders /></ManagerRoute> },
             { path: 'order-log', element: <ManagerRoute><OrderLog /></ManagerRoute> },
-            { path: 'pay/:id', element: <PaymentPage /> },
+            { path: 'payment/:id', element: <PaymentPage /> },
             { path: 'payment-success', element: <PaymentSuccess /> },
             { path: 'payment-fail', element: <PaymentFail /> },
             { path: 'track-order/:id', element: <TrackOrder /> },
         ]
-    }
+    },
+    { path: '*', element: <ErrorPage /> }
 ]);
 
 export default router;

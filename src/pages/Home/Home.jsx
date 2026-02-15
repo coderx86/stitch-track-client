@@ -1,12 +1,19 @@
 import HeroBanner from './HeroBanner';
+import OurProducts from './OurProducts';
+import HowItWorks from './HowItWorks';
+import CustomerFeedback from './CustomerFeedback';
+import WhyChooseUs from './WhyChooseUs';
+import Newsletter from './Newsletter';
 
 const Home = () => {
     return (
         <div>
             <HeroBanner />
-            <div className="py-20 text-center">
-                <h2 className="text-3xl font-bold italic text-base-content/20">Additional Sections Coming Soon...</h2>
-            </div>
+            <OurProducts />
+            <HowItWorks />
+            <CustomerFeedback />
+            <WhyChooseUs />
+            <Newsletter />
         </div>
     );
 };

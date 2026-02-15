@@ -19,7 +19,7 @@ const Register = () => {
     const [uploading, setUploading] = useState(false);
     const [preview, setPreview] = useState(null);
 
-    const { register, handleSubmit, formState: { errors }, watch } = useForm();
+    const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm();
     const watchPassword = watch('password', '');
 
     const uploadToImgBB = async (file) => {
@@ -48,7 +48,7 @@ const Register = () => {
                 photoURL = await uploadToImgBB(fileInput.files[0]);
             }
 
-            await createUser(data.email, data.password);
+            const result = await createUser(data.email, data.password);
             await updateUserProfile(data.name, photoURL);
             await axiosPublic.post('/users', {
                 name: data.name,
@@ -86,6 +86,7 @@ const Register = () => {
         <div className="w-full max-w-md mx-4 my-8">
             <div className="card bg-base-100 shadow-lg border border-base-300 rounded-2xl">
                 <div className="card-body p-8">
+                    {/* Header */}
                     <div className="text-center mb-4">
                         <Link to="/" className="inline-flex items-center gap-2 mb-3">
                             <GiSewingMachine className="text-3xl text-primary" />
@@ -96,6 +97,7 @@ const Register = () => {
                     </div>
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                        {/* Name */}
                         <div>
                             <label className="text-xs font-semibold uppercase tracking-wider text-base-content/60 mb-2 block">Your Name</label>
                             <div className="flex items-center gap-3 border border-base-300 rounded-xl px-4 py-3 focus-within:border-primary transition-colors">
@@ -105,6 +107,9 @@ const Register = () => {
                             {errors.name && <span className="text-error text-xs mt-1 block">{errors.name.message}</span>}
                         </div>
 
+                        <div className="border-b border-base-200"></div>
+
+                        {/* Email */}
                         <div>
                             <label className="text-xs font-semibold uppercase tracking-wider text-base-content/60 mb-2 block">E-Mail Address</label>
                             <div className="flex items-center gap-3 border border-base-300 rounded-xl px-4 py-3 focus-within:border-primary transition-colors">
@@ -114,6 +119,9 @@ const Register = () => {
                             {errors.email && <span className="text-error text-xs mt-1 block">{errors.email.message}</span>}
                         </div>
 
+                        <div className="border-b border-base-200"></div>
+
+                        {/* Photo Upload */}
                         <div>
                             <label className="text-xs font-semibold uppercase tracking-wider text-base-content/60 mb-2 block">Profile Photo</label>
                             <label htmlFor="photo-upload" className="flex items-center gap-3 border border-base-300 border-dashed rounded-xl px-4 py-4 cursor-pointer hover:border-primary transition-colors group">
@@ -132,6 +140,9 @@ const Register = () => {
                             <input id="photo-upload" type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
                         </div>
 
+                        <div className="border-b border-base-200"></div>
+
+                        {/* Role */}
                         <div>
                             <label className="text-xs font-semibold uppercase tracking-wider text-base-content/60 mb-2 block">Register As</label>
                             <div className="flex items-center gap-6 px-1 py-2">
@@ -146,6 +157,9 @@ const Register = () => {
                             </div>
                         </div>
 
+                        <div className="border-b border-base-200"></div>
+
+                        {/* Password */}
                         <div>
                             <label className="text-xs font-semibold uppercase tracking-wider text-base-content/60 mb-2 block">Password</label>
                             <div className="flex items-center gap-3 border border-base-300 rounded-xl px-4 py-3 focus-within:border-primary transition-colors">
@@ -165,6 +179,14 @@ const Register = () => {
                                 </button>
                             </div>
                             {errors.password && <span className="text-error text-xs mt-1 block">{errors.password.message}</span>}
+                            <div className="mt-2 text-xs space-y-1">
+                                <p className={watchPassword.length >= 6 ? 'text-success' : 'text-base-content/40'}>
+                                    {watchPassword.length >= 6 ? '✓' : '○'} At least 6 characters
+                                </p>
+                                <p className={/[A-Z]/.test(watchPassword) && /[a-z]/.test(watchPassword) ? 'text-success' : 'text-base-content/40'}>
+                                    {/[A-Z]/.test(watchPassword) && /[a-z]/.test(watchPassword) ? '✓' : '○'} Must include uppercase & lowercase
+                                </p>
+                            </div>
                         </div>
 
                         <button type="submit" disabled={uploading} className="btn btn-primary w-full rounded-xl text-base h-12 mt-2">

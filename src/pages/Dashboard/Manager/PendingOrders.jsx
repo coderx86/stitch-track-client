@@ -29,25 +29,44 @@ const PendingOrders = () => {
     });
 
     const handleApprove = (id) => {
-        Swal.fire({ title: 'Approve order?', icon: 'question', showCancelButton: true, confirmButtonText: 'Approve' }).then(r => r.isConfirmed && approveMutation.mutate(id));
+        Swal.fire({ title: 'Approve this order?', icon: 'question', showCancelButton: true, confirmButtonText: 'Approve' })
+            .then(r => { if (r.isConfirmed) approveMutation.mutate(id); });
     };
 
     const handleReject = (id) => {
-        Swal.fire({ title: 'Reject order?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Reject' }).then(r => r.isConfirmed && rejectMutation.mutate(id));
+        Swal.fire({ title: 'Reject this order?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Reject' })
+            .then(r => { if (r.isConfirmed) rejectMutation.mutate(id); });
     };
 
     return (
         <div>
             <h1 className="text-2xl font-extrabold mb-6">Pending Orders</h1>
-            {isLoading ? <div className="flex justify-center py-10"><span className="loading loading-spinner loading-lg text-primary"></span></div> : orders.length === 0 ? <div className="text-center py-20 text-base-content/50">No pending orders</div> : (
+
+            {isLoading ? (
+                <div className="flex justify-center py-10"><span className="loading loading-spinner loading-lg text-primary"></span></div>
+            ) : orders.length === 0 ? (
+                <div className="text-center py-20 text-base-content/50"><p className="text-lg">No pending orders</p></div>
+            ) : (
                 <div className="overflow-x-auto">
-                    <table className="table table-zebra w-full">
-                        <thead><tr><th>#</th><th>Product</th><th>Buyer</th><th>Qty</th><th>Total</th><th>Actions</th></tr></thead>
+                    <table className="table table-zebra">
+                        <thead>
+                            <tr><th>#</th><th>Product</th><th>Buyer</th><th>Qty</th><th>Total</th><th>Date</th><th>Actions</th></tr>
+                        </thead>
                         <tbody>
                             {orders.map((o, i) => (
                                 <tr key={o._id}>
-                                    <td>{i + 1}</td><td className="font-medium">{o.productTitle}</td><td className="text-sm">{o.userEmail}</td><td>{o.quantity}</td><td className="font-bold">${o.totalPrice}</td>
-                                    <td><div className="flex gap-1"><button onClick={() => handleApprove(o._id)} className="btn btn-ghost btn-xs text-success"><FiCheck /></button><button onClick={() => handleReject(o._id)} className="btn btn-ghost btn-xs text-error"><FiX /></button></div></td>
+                                    <td>{i + 1}</td>
+                                    <td className="font-medium text-sm">{o.productTitle}</td>
+                                    <td className="text-sm">{o.userEmail}</td>
+                                    <td>{o.quantity}</td>
+                                    <td className="font-semibold">${o.totalPrice}</td>
+                                    <td className="text-xs text-base-content/60">{new Date(o.orderedAt).toLocaleDateString()}</td>
+                                    <td>
+                                        <div className="flex gap-1">
+                                            <button className="btn btn-ghost btn-xs text-success" onClick={() => handleApprove(o._id)}><FiCheck className="text-lg" /></button>
+                                            <button className="btn btn-ghost btn-xs text-error" onClick={() => handleReject(o._id)}><FiX className="text-lg" /></button>
+                                        </div>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
