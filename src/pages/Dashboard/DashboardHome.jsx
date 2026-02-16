@@ -29,7 +29,7 @@ const DashboardHome = () => {
                 // Calculate revenue from paid orders or all completed orders
                 const allOrders = orders.data;
                 const totalRevenue = allOrders
-                    .filter(o => o.paymentStatus === 'paid')
+                    .filter(o => o.paymentStatus === 'paid' || o.status === 'completed')
                     .reduce((sum, order) => sum + order.totalPrice, 0);
                 res.revenue = totalRevenue.toFixed(2);
             } else if (role === 'manager' && !isManagerPending) {
@@ -41,7 +41,7 @@ const DashboardHome = () => {
                 res.orders = allOrders.data.length;
                 
                 // Revenue: Sum of paid orders
-                const paidOrders = allOrders.data.filter(o => o.paymentStatus === 'paid');
+                const paidOrders = allOrders.data.filter(o => o.paymentStatus === 'paid' || o.status === 'completed');
                 res.revenue = paidOrders.reduce((sum, order) => sum + order.totalPrice, 0).toFixed(2);
                 
                 // Users: Count unique buyers from orders
