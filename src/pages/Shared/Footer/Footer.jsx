@@ -1,7 +1,8 @@
 import { Link } from 'react-router';
 import { GiSewingMachine } from 'react-icons/gi';
-import { FaFacebookF, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
-import { FaXTwitter } from 'react-icons/fa6';
+import { FaFacebookF, FaInstagram, FaLinkedinIn, FaPhoneAlt, FaBusinessTime } from 'react-icons/fa';
+import { FaXTwitter, FaLocationDot } from 'react-icons/fa6';
+import { IoIosMail } from "react-icons/io";
 
 const Footer = () => {
     return (
@@ -52,10 +53,10 @@ const Footer = () => {
                     <div>
                         <h3 className="font-bold text-lg mb-4">Contact Us</h3>
                         <ul className="space-y-2 text-sm text-base-content/70">
-                            <li>📍 123 Garment District, Dhaka</li>
-                            <li>📧 hello@stitchtrack.com</li>
-                            <li>📞 +880 1234-567890</li>
-                            <li>🕐 Mon - Sat: 9AM - 6PM</li>
+                            <li className='flex items-center gap-2'> <FaLocationDot className='text-primary' />123 Garment District, Dhaka</li>
+                            <li className='flex items-center gap-2'><IoIosMail className='text-primary' /> hello@stitchtrack.com</li>
+                            <li className='flex items-center gap-2'><FaPhoneAlt className='text-primary' /> +880 1234-567890</li>
+                            <li className='flex items-center gap-2'><FaBusinessTime className='text-primary' /> Mon - Sat: 9AM - 6PM</li>
                         </ul>
                     </div>
                 </div>
@@ -65,8 +66,7 @@ const Footer = () => {
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-base-content/60">
                     <p>© {new Date().getFullYear()} StitchTrack. All rights reserved.</p>
                     <div className="flex gap-4">
-                        <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-                        <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
+                        <Link to="/terms" className="hover:text-primary transition-colors">Privacy Policy & Terms of Service</Link>
                     </div>
                 </div>
             </div>
