@@ -32,14 +32,10 @@ const Navbar = () => {
         <>
             <NavLink to="/" end className={linkClass}>Home</NavLink>
             <NavLink to="/all-products" className={linkClass}>All Products</NavLink>
-            {!user && (
-                <>
-                    <NavLink to="/about" className={linkClass}>About Us</NavLink>
-                    <NavLink to="/contact" className={linkClass}>Contact</NavLink>
-                </>
-            )}
-            {user && (<NavLink to="/dashboard" className={linkClass}>Dashboard</NavLink>
-            )}
+            <NavLink to="/blog" className={linkClass}>Blog</NavLink>
+            <NavLink to="/about" className={linkClass}>About Us</NavLink>
+            <NavLink to="/contact" className={linkClass}>Contact</NavLink>
+            {user && <NavLink to="/dashboard" className={linkClass}>Dashboard</NavLink>}
         </>
     );
 

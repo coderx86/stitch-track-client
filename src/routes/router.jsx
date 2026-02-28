@@ -31,6 +31,9 @@ import PaymentFail from '../pages/Payment/PaymentFail';
 import PrivateRoute from './PrivateRoute';
 import AdminRoute from './AdminRoute';
 import ManagerRoute from './ManagerRoute';
+import Blog from '../pages/Blog/Blog';
+import BlogDetail from '../pages/Blog/BlogDetail';
+import Terms from '../pages/Terms/Terms';
 
 const router = createBrowserRouter([
     {
@@ -44,6 +47,9 @@ const router = createBrowserRouter([
             { path: 'contact', element: <Contact /> },
             { path: 'product/:id', element: <ProductDetails /> },
             { path: 'book-product/:id', element: <PrivateRoute><BookingForm /></PrivateRoute> },
+            { path: 'blog', element: <Blog /> },
+            { path: 'blog/:slug', element: <BlogDetail /> },
+            { path: 'terms', element: <Terms /> },
         ]
     },
     {
