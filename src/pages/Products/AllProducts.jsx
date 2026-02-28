@@ -3,23 +3,26 @@ import { Link, useSearchParams } from 'react-router';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import useAxios from '../../hooks/useAxios';
-import { FiSearch } from 'react-icons/fi';
+import { FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+
+const LIMIT_OPTIONS = [6, 12, 24];
 
 const AllProducts = () => {
     const axios = useAxios();
     const [searchParams, setSearchParams] = useSearchParams();
     const [search, setSearch] = useState(searchParams.get('search') || '');
     const [category, setCategory] = useState(searchParams.get('category') || '');
+    const [limit, setLimit] = useState(parseInt(searchParams.get('limit') || '12'));
     const page = parseInt(searchParams.get('page') || '1');
 
     const { data, isLoading } = useQuery({
-        queryKey: ['all-products', search, category, page],
+        queryKey: ['all-products', search, category, page, limit],
         queryFn: async () => {
             const params = new URLSearchParams();
             if (search) params.append('search', search);
             if (category) params.append('category', category);
             params.append('page', page);
-            params.append('limit', 12);
+            params.append('limit', limit);
             const res = await axios.get(`/products?${params.toString()}`);
             return res.data;
         }
@@ -27,20 +30,27 @@ const AllProducts = () => {
 
     const products = data?.products || [];
     const totalPages = data?.totalPages || 1;
+    const total = data?.total || 0;
 
-    const handleSearch = (e) => {
-        e.preventDefault();
-        const params = new URLSearchParams();
-        if (search) params.set('search', search);
-        if (category) params.set('category', category);
-        params.set('page', '1');
+    const updateParams = (updates) => {
+        const params = new URLSearchParams(searchParams);
+        Object.entries(updates).forEach(([k, v]) => params.set(k, v));
         setSearchParams(params);
     };
 
+    const handleSearch = (e) => {
+        e.preventDefault();
+        updateParams({ search, category, page: 1, limit });
+    };
+
+    const handleLimitChange = (newLimit) => {
+        setLimit(newLimit);
+        updateParams({ limit: newLimit, page: 1 });
+    };
+
     const handlePageChange = (newPage) => {
-        const params = new URLSearchParams(searchParams);
-        params.set('page', newPage);
-        setSearchParams(params);
+        updateParams({ page: newPage });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     return (
@@ -52,20 +62,43 @@ const AllProducts = () => {
             </motion.div>
 
             {/* Search & Filter */}
-            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 mb-8 max-w-2xl mx-auto">
-                <label className="input input-bordered flex items-center gap-2 flex-1">
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row justify-between gap-2 mb-6 max-w-2xl mx-auto w-full">
+                <label className="border border-base-300 px-4 flex items-center gap-2 w-full focus-within:border-primary transition-colors bg-base-100">
                     <FiSearch className="text-base-content/40" />
-                    <input type="text" placeholder="Search products..." className="grow" value={search} onChange={(e) => setSearch(e.target.value)} />
+                    <input type="text" placeholder="Search products..." className="grow outline-none w-full"
+                        value={search} onChange={(e) => setSearch(e.target.value)} />
                 </label>
-                <select className="select select-bordered" value={category} onChange={(e) => { setCategory(e.target.value); }}>
-                    <option value="">All Categories</option>
-                    <option value="Shirt">Shirt</option>
-                    <option value="Pant">Pant</option>
-                    <option value="Jacket">Jacket</option>
-                    <option value="Accessories">Accessories</option>
-                </select>
-                <button type="submit" className="btn btn-primary">Search</button>
+                <div className="flex gap-2 w-full">
+                    <select className="border border-base-300 px-4 focus-within:border-primary transition-colors bg-base-100 flex-1"
+                        value={category} onChange={(e) => setCategory(e.target.value)}>
+                        <option value="">All Categories</option>
+                        <option value="Shirt">Shirt</option>
+                        <option value="Pant">Pant</option>
+                        <option value="Jacket">Jacket</option>
+                        <option value="Accessories">Accessories</option>
+                    </select>
+                    <button type="submit" className="btn btn-primary flex-1">Search</button>
+                </div>
             </form>
+
+            {/* Top bar: results info + per-page selector — single row */}
+            {!isLoading && (
+                <div className="flex items-center justify-between gap-3 mb-6">
+                    <p className="text-sm text-base-content/60">
+                        Showing <span className="font-semibold text-base-content">{products.length}</span> of <span className="font-semibold text-base-content">{total}</span> products
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-base-content/60 hidden sm:block">Show:</span>
+                        <select className="select select-bordered select-sm"
+                            value={limit}
+                            onChange={(e) => handleLimitChange(Number(e.target.value))}>
+                            {LIMIT_OPTIONS.map(opt => (
+                                <option key={opt} value={opt}>{opt} / page</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+            )}
 
             {/* Products Grid */}
             {isLoading ? (
@@ -80,7 +113,7 @@ const AllProducts = () => {
                                 key={product._id}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.05 }}
+                                transition={{ delay: i * 0.04 }}
                                 className="card bg-base-100 border border-base-300 shadow-sm hover:shadow-xl transition-all group"
                             >
                                 <figure className="relative overflow-hidden">
@@ -107,17 +140,34 @@ const AllProducts = () => {
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex justify-center mt-10">
-                            <div className="join">
-                                {[...Array(totalPages)].map((_, i) => (
-                                    <button
-                                        key={i}
-                                        className={`join-item btn btn-sm ${page === i + 1 ? 'btn-primary' : 'btn-outline'}`}
-                                        onClick={() => handlePageChange(i + 1)}
-                                    >
-                                        {i + 1}
-                                    </button>
-                                ))}
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-10">
+                            <p className="text-sm text-base-content/60">
+                                Page <span className="font-semibold">{page}</span> of <span className="font-semibold">{totalPages}</span>
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <button className="btn btn-sm btn-outline gap-1"
+                                    onClick={() => handlePageChange(page - 1)} disabled={page === 1}>
+                                    <FiChevronLeft /> Prev
+                                </button>
+                                <div className="join">
+                                    {[...Array(totalPages)].map((_, i) => {
+                                        const p = i + 1;
+                                        if (totalPages <= 7 || p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                                            return (
+                                                <button key={p}
+                                                    className={`join-item btn btn-sm ${page === p ? 'btn-primary' : 'btn-outline'}`}
+                                                    onClick={() => handlePageChange(p)}>
+                                                    {p}
+                                                </button>
+                                            );
+                                        if (Math.abs(p - page) === 2) return <button key={p} className="join-item btn btn-sm btn-disabled">…</button>;
+                                        return null;
+                                    })}
+                                </div>
+                                <button className="btn btn-sm btn-outline gap-1"
+                                    onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}>
+                                    Next <FiChevronRight />
+                                </button>
                             </div>
                         </div>
                     )}
