@@ -97,13 +97,21 @@ const ManageUsers = () => {
     };
 
     const roleBadge = (role) => {
-        const colors = { admin: 'badge-error', manager: 'badge-info', buyer: 'badge-success' };
-        return <span className={`badge badge-sm ${colors[role] || 'badge-ghost'} capitalize`}>{role}</span>;
+        const colors = { 
+            admin: 'bg-error/20 text-error border-error/20', 
+            manager: 'bg-info/20 text-info border-info/20', 
+            buyer: 'bg-success/20 text-success border-success/20' 
+        };
+        return <span className={`badge badge-sm border font-medium ${colors[role] || 'badge-ghost'} capitalize py-3 px-3`}>{role}</span>;
     };
 
     const statusBadge = (status) => {
-        const colors = { active: 'badge-success', pending: 'badge-warning', suspended: 'badge-error' };
-        return <span className={`badge badge-sm ${colors[status] || 'badge-ghost'} capitalize`}>{status}</span>;
+        const colors = { 
+            pending: 'bg-warning/20 text-warning border-warning/20', 
+            suspended: 'bg-error/20 text-error border-error/20',
+            approved: 'bg-success/20 text-success border-success/20'
+        };
+        return <span className={`badge badge-sm border font-medium py-3 px-3 ${colors[status] || 'badge-ghost'} capitalize`}>{status}</span>;
     };
 
     return (
@@ -143,7 +151,7 @@ const ManageUsers = () => {
                                 <th>User</th>
                                 <th>Email</th>
                                 <th>Role</th>
-                                {/* <th>Status</th> */}
+                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -159,7 +167,7 @@ const ManageUsers = () => {
                                     </td>
                                     <td className="text-sm">{u.email}</td>
                                     <td>{roleBadge(u.role)}</td>
-                                    {/* <td>{statusBadge(u.status)}</td> */}
+                                    <td>{statusBadge(u.status)}</td>
                                     <td>
                                         <div className="flex gap-1">
                                             {u.email === user?.email ? (

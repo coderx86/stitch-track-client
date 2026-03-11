@@ -1,17 +1,35 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import Swal from 'sweetalert2';
-import { FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { Link } from 'react-router';
+import { useState } from 'react';
 
 const ManageProducts = () => {
     const axiosSecure = useAxiosSecure();
     const queryClient = useQueryClient();
+    const [page, setPage] = useState(1);
+    const limit = 10;
 
-    const { data: products = [], isLoading } = useQuery({
-        queryKey: ['my-products'],
-        queryFn: async () => (await axiosSecure.get('/products/manager/my-products')).data
+    const { data = {}, isLoading } = useQuery({
+        queryKey: ['my-products', page],
+        queryFn: async () => {
+            const res = await axiosSecure.get('/products/manager/my-products');
+            const allData = res.data;
+            
+            const startIndex = (page - 1) * limit;
+            const endIndex = startIndex + limit;
+            const paginatedData = allData.slice(startIndex, endIndex);
+            
+            return {
+                products: paginatedData,
+                total: allData.length,
+                totalPages: Math.ceil(allData.length / limit)
+            };
+        }
     });
+
+    const { products = [], totalPages = 1 } = data;
 
     const deleteMutation = useMutation({
         mutationFn: async (id) => axiosSecure.delete(`/products/manager/${id}`),
@@ -57,7 +75,7 @@ const ManageProducts = () => {
                         <tbody>
                             {products.map((p, i) => (
                                 <tr key={p._id}>
-                                    <td>{i + 1}</td>
+                                    <td>{(page - 1) * limit + i + 1}</td>
                                     <td>
                                         <div className="flex items-center gap-3">
                                             <div className="avatar"><div className="w-10 rounded"><img src={p.images?.[0] || 'https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp'} alt="" /></div></div>
@@ -78,6 +96,37 @@ const ManageProducts = () => {
                             ))}
                         </tbody>
                     </table>
+                    
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <div className="flex justify-center mt-6 py-4">
+                            <div className="join shadow-sm">
+                                <button 
+                                    className="join-item btn btn-sm" 
+                                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                                    disabled={page === 1}
+                                >
+                                    <FiChevronLeft />
+                                </button>
+                                {[...Array(totalPages)].map((_, idx) => (
+                                    <button 
+                                        key={idx}
+                                        className={`join-item btn btn-sm ${page === idx + 1 ? 'btn-primary' : ''}`}
+                                        onClick={() => setPage(idx + 1)}
+                                    >
+                                        {idx + 1}
+                                    </button>
+                                ))}
+                                <button 
+                                    className="join-item btn btn-sm" 
+                                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={page === totalPages}
+                                >
+                                    <FiChevronRight />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

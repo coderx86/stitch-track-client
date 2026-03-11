@@ -1,17 +1,35 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import Swal from 'sweetalert2';
-import { FiXCircle, FiEye, FiTruck } from 'react-icons/fi';
+import { useState } from 'react';
+import { FiXCircle, FiEye, FiTruck, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { Link } from 'react-router';
 
 const MyOrders = () => {
     const axiosSecure = useAxiosSecure();
     const queryClient = useQueryClient();
+    const [page, setPage] = useState(1);
+    const limit = 10;
 
-    const { data: orders = [], isLoading } = useQuery({
-        queryKey: ['my-orders'],
-        queryFn: async () => (await axiosSecure.get('/orders/my-orders')).data
+    const { data = {}, isLoading } = useQuery({
+        queryKey: ['my-orders', page],
+        queryFn: async () => {
+             const res = await axiosSecure.get('/orders/my-orders');
+             const allData = res.data;
+             
+             const startIndex = (page - 1) * limit;
+             const endIndex = startIndex + limit;
+             const paginatedData = allData.slice(startIndex, endIndex);
+             
+             return {
+                 orders: paginatedData,
+                 total: allData.length,
+                 totalPages: Math.ceil(allData.length / limit)
+             };
+        }
     });
+
+    const { orders = [], totalPages = 1 } = data;
 
     const cancelMutation = useMutation({
         mutationFn: async (id) => axiosSecure.patch(`/orders/${id}/cancel`),
@@ -38,8 +56,16 @@ const MyOrders = () => {
     };
 
     const statusBadge = (status) => {
-        const colors = { pending: 'badge-warning', approved: 'badge-success', completed: 'badge-primary', rejected: 'badge-error', cancelled: 'badge-ghost' };
-        return <span className={`badge badge-sm ${colors[status] || 'badge-ghost'} capitalize`}>{status}</span>;
+        const colors = { 
+            pending: 'bg-warning/20 text-warning border-warning/20', 
+            approved: 'bg-info/20 text-info border-info/20', 
+            processing: 'bg-primary/20 text-primary border-primary/20',
+            shipped: 'bg-secondary/20 text-secondary border-secondary/20',
+            completed: 'bg-success/20 text-success border-success/20',
+            rejected: 'bg-error/20 text-error border-error/20', 
+            cancelled: 'bg-base-300 text-base-content/70 border-base-300' 
+        };
+        return <span className={`badge badge-sm border font-medium ${colors[status] || 'badge-ghost'} capitalize py-3 px-3`}>{status}</span>;
     };
 
     return (
@@ -72,7 +98,7 @@ const MyOrders = () => {
                         <tbody>
                             {orders.map((o, i) => (
                                 <tr key={o._id}>
-                                    <td>{i + 1}</td>
+                                    <td>{(page - 1) * limit + i + 1}</td>
                                     <td>
                                         {(o.status === 'approved' || o.status === 'completed') ? (
                                             <Link to={`/dashboard/track-order/${o._id}`} className="badge badge-ghost font-mono text-xs">
@@ -87,20 +113,26 @@ const MyOrders = () => {
                                     <td className="font-bold text-primary">${o.totalPrice}</td>
                                     <td>{statusBadge(o.status)}</td>
                                     <td>
-                                        <span className={`badge badge-sm ${o.paymentStatus === 'paid' ? 'badge-success' : 'badge-warning'}`}>
+                                        <span className={`badge badge-sm font-medium py-3 px-3 capitalize ${o.paymentStatus === 'paid' ? 'bg-success/20 text-success border-success/20' : 'bg-warning/20 text-warning border-warning/20'} border`}>
                                             {o.paymentStatus === 'paid' ? 'Paid' : 'Unpaid'}
                                         </span>
                                     </td>
-                                    <td className="text-sm text-base-content/70">{new Date(o.orderedAt).toLocaleDateString()}</td>
+                                    <td className="text-sm text-base-content/70">{new Date(o.orderedAt).toLocaleString()}</td>
                                     <td>
                                         <div className="flex gap-2">
                                             {o.status !== 'completed' && o.paymentStatus !== 'paid' && o.paymentMethod === 'payfirst' && (
                                                 <Link to={`/dashboard/payment/${o._id}`} className="btn btn-primary btn-xs">Pay</Link>
                                             )}
-                                            {o.status === 'pending' && (
+                                            {o.status === 'pending' ? (
                                                 <button className="btn btn-error btn-xs btn-outline" onClick={() => handleCancel(o._id)} title="Cancel Order">
                                                     <FiXCircle />
                                                 </button>
+                                            ) : (
+                                                <div title="You can't cancel this order. To cancel this order, please contact us.">
+                                                    <button className="btn btn-error btn-xs btn-outline" disabled>
+                                                        <FiXCircle />
+                                                    </button>
+                                                </div>
                                             )}
                                         </div>
                                     </td>
@@ -108,6 +140,37 @@ const MyOrders = () => {
                             ))}
                         </tbody>
                     </table>
+                    
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <div className="flex justify-center mt-6 py-4">
+                            <div className="join shadow-sm">
+                                <button 
+                                    className="join-item btn btn-sm" 
+                                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                                    disabled={page === 1}
+                                >
+                                    <FiChevronLeft />
+                                </button>
+                                {[...Array(totalPages)].map((_, idx) => (
+                                    <button 
+                                        key={idx}
+                                        className={`join-item btn btn-sm ${page === idx + 1 ? 'btn-primary' : ''}`}
+                                        onClick={() => setPage(idx + 1)}
+                                    >
+                                        {idx + 1}
+                                    </button>
+                                ))}
+                                <button 
+                                    className="join-item btn btn-sm" 
+                                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={page === totalPages}
+                                >
+                                    <FiChevronRight />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
